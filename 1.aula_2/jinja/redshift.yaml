@@ -8,18 +8,18 @@ Resources:
       AllowVersionUpgrade: true
       AutomatedSnapshotRetentionPeriod: 5
       AvailabilityZone: us-east-1a
-      ClusterIdentifier: redshift-{{ ENVIRONMENT }}-cluster
+      ClusterIdentifier: redshift-production-cluster
       ClusterParameterGroupName: !Ref RedshiftParameterGroup
       ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
       VpcSecurityGroupIds:
         - !Ref RedshiftEC2SecurityGroup
       ClusterType: multi-node
-      DBName: {{ redshiftCluster.dbName }}
+      DBName: app
       Encrypted: true
-      MasterUsername: {{ redshiftClusterMasterUsername }}
-      MasterUserPassword: {{ redshiftClusterMasterUserPassword }}
-      NodeType: {{ redshiftCluster.nodeType }}
-      NumberOfNodes: {{ redshiftCluster.numberOfNodes }}
+      MasterUsername: admin
+      MasterUserPassword: Admin1234
+      NodeType: dc2.large
+      NumberOfNodes: 2
       PubliclyAccessible: true
       IamRoles:
         - !GetAtt RedshiftRole.Arn
@@ -40,39 +40,51 @@ Resources:
         - ParameterName: max_concurrency_scaling_clusters
           ParameterValue: 0
 
-  {% for env in environments %}
-  {% if env.name == ENVIRONMENT %}
+  
+  
   RedshiftVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: {{ env.vpcCidrBlock }}
+      CidrBlock: 10.0.0.0/16
 
   RedshiftSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: us-east-1a
-      CidrBlock: {{ env.subnetCidrBlock }}
+      CidrBlock: 10.0.0.0/24
       VpcId: !Ref RedshiftVPC
-  {% endif %}
-  {% endfor %}
+  
+  
+  
+  
 
   RedshiftEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for Redshift. Public access
-      GroupName: redshift-{{ ENVIRONMENT }}-security-group
+      GroupName: redshift-production-security-group
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           FromPort: 5439
           IpProtocol: tcp
           ToPort: 5439
       SecurityGroupIngress:
-      {% for ip in redshiftCluster.securityGroup.whitelistedIps %}
-        - CidrIp: {{ ip }}
+      
+        - CidrIp: 5.6.7.8/32
           FromPort: 5439
           IpProtocol: tcp
           ToPort: 5439
-      {% endfor %}
+      
+        - CidrIp: 1.2.3.4/32
+          FromPort: 5439
+          IpProtocol: tcp
+          ToPort: 5439
+      
+        - CidrIp: 9.10.11.12/32
+          FromPort: 5439
+          IpProtocol: tcp
+          ToPort: 5439
+      
       VpcId: !Ref RedshiftVPC
 
   RedshiftEC2SecurityGroupIngress:
@@ -124,7 +136,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Path: "/"
-      RoleName: iam-{{ ENVIRONMENT }}-redshift-role
+      RoleName: iam-production-redshift-role
 
   RedshiftSpectrumPolicy:
     Type: AWS::IAM::Policy
@@ -165,6 +177,6 @@ Resources:
               - athena:*
             Resource:
               - "*"
-      PolicyName: iam-{{ ENVIRONMENT }}-redshift-spectrum-policy
+      PolicyName: iam-production-redshift-spectrum-policy
       Roles:
         - !Ref RedshiftRole
