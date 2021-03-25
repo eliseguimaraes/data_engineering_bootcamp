@@ -28,4 +28,4 @@ jobs:
         redshiftClusterMasterUserPassword: ${{ secrets.redshiftClusterMasterUserPassword }}
         ENVIRONMENT: production
       run: |
-        python 1.aula2/jinja/deploy.py
+        python 1.aula_2/jinja/deploy.py
