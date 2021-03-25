@@ -1,4 +1,4 @@
-name: Deploy S3 bucket
+name: Run tests
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - "*"
 
 jobs:
-  deploy:
+  test:
 
     runs-on: ubuntu-latest
 

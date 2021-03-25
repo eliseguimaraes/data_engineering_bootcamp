@@ -1,4 +1,4 @@
-name: Deploy S3 bucket
+name: Deploy S3 bucket using jinja
 
 on:
   push:
@@ -28,4 +28,4 @@ jobs:
         redshiftClusterMasterUserPassword: ${{ secrets.redshiftClusterMasterUserPassword }}
         ENVIRONMENT: production
       run: |
-        python 1.aula2/jinja/deploy.py
+        python 1.aula_2/jinja/deploy.py
